@@ -34,7 +34,6 @@ HWND hwnd;
 const int OBJECT_SIZE = 100;
 int object_cnt = 0;
 CObject *pt_objects[OBJECT_SIZE];
-void DrawObject(HDC hdc);
 void DestoryObject();
 // <<
 
@@ -208,6 +207,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 	case WM_LBUTTONDOWN:
 		{
+			// 객체 생성
 			int px = rand() % rectView.right;
 			int py = rand() % rectView.bottom;
 			int r = 10;
@@ -224,8 +224,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+		// 끄기 전에 쓰레드 연산 다 끝나면 종료
+		WaitForMultipleObjects(1, &hThread, TRUE, INFINITE);
+		// 객체 파괴
 		DestoryObject();
+		// 스레드 종료
 		ExitThread(dwThID1, hThread);
+		// 동기화 방법 종료
 		DeleteCriticalSection(&cs);
         PostQuitMessage(0);
         break;
@@ -255,16 +260,6 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-void DrawObject(HDC hdc)
-{
-	for (int i = 0; i < object_cnt; i++)
-	{
-		if (pt_objects[i] == NULL)
-			return;
-		else
-			pt_objects[i]->Draw(hdc);
-	}
-}
 
 void DestoryObject()
 {
