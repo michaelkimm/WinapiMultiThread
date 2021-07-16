@@ -226,6 +226,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
 		DestoryObject();
 		ExitThread(dwThID1, hThread);
+		DeleteCriticalSection(&cs);
         PostQuitMessage(0);
         break;
     default:
@@ -285,8 +286,8 @@ unsigned __stdcall ThFunc1(LPVOID lpParam)
 	HBRUSH hOldBrush;
 	while (1)
 	{
+		EnterCriticalSection(&cs);
 		HDC hdc = GetDC(hwnd);
-
 
 		for (int i = 0; i < object_cnt; i++)
 		{
@@ -306,6 +307,7 @@ unsigned __stdcall ThFunc1(LPVOID lpParam)
 
 		ReleaseDC(hwnd, hdc);
 		Sleep(1000);
+		LeaveCriticalSection(&cs);
 	}
 	return 0;
 }
